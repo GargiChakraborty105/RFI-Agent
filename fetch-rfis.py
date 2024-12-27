@@ -26,7 +26,7 @@ def fetch_projects(access_token, company_id):
     headers = {
         "Authorization": f"Bearer {access_token}"
     }
-    response = requests.get(f"{BASE_URL}/projects?company_id={company_id}", headers=headers)
+    response = requests.get(f"https://sandbox.procore.com/rest/v1.0/projects?company_id={company_id}", headers=headers)
     try:
         response.raise_for_status()
         return response.json()
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         # Step 1: Get the company ID
         companies = fetch_companies(access_token)
         print("Companies:", companies)
-        company_id = companies[0]["id"]  # Replace with the desired company
+        company_id = companies["data"][0]["id"]  # Replace with the desired company
         print("Selected Company ID:", company_id)
 
         # Step 2: Fetch projects for the company
