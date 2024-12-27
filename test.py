@@ -1,12 +1,12 @@
 import requests
 
 # Replace these with your app credentials
-CLIENT_ID = "mHxlqjw5QsyHmIb4XWKaOVuBZ60IvOjpQLAZPiryysM"
-CLIENT_SECRET = "XGNaagkLBFdr4KLHwb1cc8yOz60BHa44DVGPxC3tStA"
+CLIENT_ID = "atpQwDiOJKEvGA35HP_dlcavpqa56b6v1gZbIWvrcRA"
+CLIENT_SECRET = "GjVONicEuD1_CUDrh5qU5XxPo7VV-VpD2R8u-_GTgvk"
 REDIRECT_URI = "http://localhost/callback"  # Same as what you provided during app creation
-AUTH_CODE = "5NUjMn7HTElnsFqxAhncDO9ikxugXOvUqoDdrzaYhuY"
+AUTH_CODE = "wdo7LuIYGyt0n8DMRz9u3t8WDsG4xALReh-W7kbYums"
 
-TOKEN_URL = "https://login.procore.com/oauth/token"
+TOKEN_URL = "https://sandbox.procore.com/oauth/token"
 
 # Exchange the authorization code for an access token
 payload = {
