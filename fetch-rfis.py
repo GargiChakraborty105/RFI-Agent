@@ -39,7 +39,16 @@ def fetch_projects(access_token, company_id):
         print(f"JSON Parsing Error while fetching projects: {err}")
         print("Response Text:", response.text)
         raise
-
+def fetch_rfis(access_token, company_id, project_id):
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Procore-Company-Id": f"{company_id}"
+    }
+    # try:
+    response = requests.get(f"http://sandbox.procore.com/rest/v1.0/projects/{project_id}/rfis",headers=headers)
+    return response.json()
+    # except:
+        # return "Error Fetching RFIs"
 if __name__ == "__main__":
     load_dotenv()
 
@@ -50,11 +59,17 @@ if __name__ == "__main__":
         # Step 1: Get the company ID
         companies = fetch_companies(access_token)
         print("Companies:", companies)
-        company_id = companies["data"][0]["id"]  # Replace with the desired company
+        company_id = companies["data"][1]["id"]  # Replace with the desired company
         print("Selected Company ID:", company_id)
-
+        print(type(company_id))
         # Step 2: Fetch projects for the company
         projects = fetch_projects(access_token, company_id)
         print("Projects:", projects)
+        print(len(projects))
+        project_id = projects[0]["id"]
+        print(project_id)
+        rfis = fetch_rfis(access_token, company_id, project_id)
+        print(f"rfis : {rfis}")
+        print(len(rfis))
     except Exception as e:
         print("An error occurred:", e)
