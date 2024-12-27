@@ -43,7 +43,7 @@ def fetch_projects(access_token, company_id):
 if __name__ == "__main__":
     load_dotenv()
 
-    BASE_URL = "https://api.procore.com/rest/v1.1"
+    BASE_URL = "https://sandbox.procore.com/rest/v2.0/"
     access_token = os.getenv('ACCESS_TOKEN')
 
     try:
