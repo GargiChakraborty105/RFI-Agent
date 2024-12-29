@@ -1,10 +1,10 @@
 import psycopg2
 
-conn = psycopg2.connect("postgres://agentUser:Gargi102#@103.75.161.199:5432/rfi_agent")
+conn = psycopg2.connect("postgresql://alipa:Gargi1002#@dpg-ctohkfd2ng1s73biuvr0-a.oregon-postgres.render.com/rfi_agent")
 cursor = conn.cursor()
 
 # Example query
-cursor.execute("SELECT * FROM Sales_data")
+cursor.execute("SELECT * FROM rfis")
 result = cursor.fetchall()
 print(result)
 
