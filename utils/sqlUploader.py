@@ -7,13 +7,15 @@ class Uploader:
     def rfi_uploader(self,datas):
         table = "rfis"
         attributes = [
-            'id', 'initiated_at', 'subject', 'status', 'priority', 'created_at', 'updated_at', 'due_date', 'questions', 'assignees', 'project_id'
+            'id', 'initiated_at', 'subject', 'status', 'priority_name', 'created_at', 'updated_at', 'due_date', 'questions_body', 'assignees_name', 'project_id', 'assignees_id', 'priority_value'
         ]
         for data in datas:
             try:
                 values = []
                 for x in attributes:
+                    print(f'operating on {x}')
                     values.append(data[x])
+                    print(type(data[x]))
                 
                 # Create the column names and values dynamically from the dictionary
                 columns = ', '.join(attributes)
@@ -35,15 +37,53 @@ class Uploader:
                 self.conn.rollback()
                 print(f"Already existed data: {e}")
             
-            except Exception as e:
-                # Handle other potential exceptions
+            # except Exception as e:
+            #     # Handle other potential exceptions
+            #     self.conn.rollback()
+            #     print(f"An unexpected error occurred: {e}")
+
+
+    def projects_uploader(self,datas):
+        table = "projects"
+        attributes = [
+            'id', 'name', 'start_date', 'completion_date', 'address', 'city', 'state_code', 'country_code', 'zip','created_at', 'active','updated_at', 'company_id', 'company_name'
+        ]
+        for data in datas:
+            try:
+                values = []
+                for x in attributes:
+                    print(f'operating on {x}')
+                    values.append(data[x])
+                    print(type(data[x]))
+                
+                # Create the column names and values dynamically from the dictionary
+                columns = ', '.join(attributes)
+                placeholders = ', '.join(['%s'] * len(attributes))
+                values = tuple(values)
+                print(len(columns),len(values))
+                # Formulate the INSERT query
+                query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders});"
+                
+                # Execute the query
+                self.cursor.execute(query, values)
+                
+                # Commit the transaction
+                self.conn.commit()
+
+                print("Data inserted successfully!")
+            except psycopg2.IntegrityError as e:
+            # Rollback the transaction for the failed insert
                 self.conn.rollback()
-                print(f"An unexpected error occurred: {e}")
+                print(f"Already existed data: {e}")
+            
+            # except Exception as e:
+            #     # Handle other potential exceptions
+            #     self.conn.rollback()
+            #     print(f"An unexpected error occurred: {e}")
         
         
         self.cursor.close()
         self.conn.close()
-
 # upload = Uploader()
 # d = [{
 #             'id' : 103, 

@@ -1,6 +1,7 @@
 import requests
 from dotenv import load_dotenv
 import os
+from utils.sqlUploader import Uploader
 
 # Fetch the list of companies to get the company_id
 def fetch_companies(access_token):
@@ -59,17 +60,32 @@ if __name__ == "__main__":
         # Step 1: Get the company ID
         companies = fetch_companies(access_token)
         print("Companies:", companies)
-        company_id = companies["data"][1]["id"]  # Replace with the desired company
+        company_id = companies["data"][0]["id"]  # Replace with the desired company
         print("Selected Company ID:", company_id)
         print(type(company_id))
         # Step 2: Fetch projects for the company
         projects = fetch_projects(access_token, company_id)
         print("Projects:", projects)
         print(len(projects))
+        for x in projects:
+            x['company_id'] = x['company']['id']
+            x['company_name'] = x['company']['name']
         project_id = projects[0]["id"]
         print(project_id)
         rfis = fetch_rfis(access_token, company_id, project_id)
         print(f"rfis : {rfis}")
-        print(len(rfis))
+        print(type(rfis))
+        for x in rfis:
+            print(type(x))
+            x['project_id'] = project_id
+            x['assignees_name'] = [y['name'] for y in x['assignees']]
+            x['assignees_id'] = [y['id'] for y in x['assignees']]
+            x['priority_name'] = x['priority']['name']
+            x['priority_value'] = x['priority']['value']
+            x['questions_body'] = [y['body'] for y in x['questions']]
+        print(rfis)
+        upload = Uploader()
+        upload.rfi_uploader(rfis)
+        upload.projects_uploader(projects)
     except Exception as e:
         print("An error occurred:", e)
