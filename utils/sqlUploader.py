@@ -37,10 +37,10 @@ class Uploader:
                 self.conn.rollback()
                 print(f"Already existed data: {e}")
             
-            # except Exception as e:
-            #     # Handle other potential exceptions
-            #     self.conn.rollback()
-            #     print(f"An unexpected error occurred: {e}")
+            except Exception as e:
+                # Handle other potential exceptions
+                self.conn.rollback()
+                print(f"An unexpected error occurred: {e}")
 
 
     def projects_uploader(self,datas):
@@ -76,10 +76,10 @@ class Uploader:
                 self.conn.rollback()
                 print(f"Already existed data: {e}")
             
-            # except Exception as e:
-            #     # Handle other potential exceptions
-            #     self.conn.rollback()
-            #     print(f"An unexpected error occurred: {e}")
+            except Exception as e:
+                # Handle other potential exceptions
+                self.conn.rollback()
+                print(f"An unexpected error occurred: {e}")
         
         
         self.cursor.close()
