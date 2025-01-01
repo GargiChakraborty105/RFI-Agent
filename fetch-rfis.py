@@ -1,7 +1,7 @@
 import requests
 from dotenv import load_dotenv
 import os
-from utils.sqlUploader import Uploader
+from utils.sqlOperator import Uploader
 
 # Fetch the list of companies to get the company_id
 def fetch_companies(access_token):
