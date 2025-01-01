@@ -53,9 +53,9 @@ def fetch_rfis(access_token, company_id, project_id):
 if __name__ == "__main__":
     load_dotenv()
 
-    BASE_URL = "https://sandbox.procore.com/rest/v2.0/"
+    BASE_URL = "https://sandbox.procore.com/rest/v2.0"
     access_token = os.getenv('ACCESS_TOKEN')
-
+    print(access_token)
     try:
         # Step 1: Get the company ID
         companies = fetch_companies(access_token)
