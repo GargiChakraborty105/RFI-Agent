@@ -1,10 +1,14 @@
 import requests
 
+#token generation url 
+
+#https://login.procore.com/oauth/authorize?client_id=atpQwDiOJKEvGA35HP_dlcavpqa56b6v1gZbIWvrcRA&redirect_uri=http://localhost/callback&response_type=code
+
 # Replace these with your app credentials
 CLIENT_ID = "atpQwDiOJKEvGA35HP_dlcavpqa56b6v1gZbIWvrcRA"
 CLIENT_SECRET = "GjVONicEuD1_CUDrh5qU5XxPo7VV-VpD2R8u-_GTgvk"
 REDIRECT_URI = "http://localhost/callback"  # Same as what you provided during app creation
-AUTH_CODE = "Hbit_6XN0dROnW1uoQbxRqNiAvxOWf1nZ1BEtMM2SOA"
+AUTH_CODE = "XnPUPY8j1EJhpCl-rNXfehiGA8NdzcNE9IuzD02RATs"
 
 TOKEN_URL = "https://sandbox.procore.com/oauth/token"
 
