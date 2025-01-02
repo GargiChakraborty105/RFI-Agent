@@ -2,7 +2,7 @@ import psycopg2
 
 class Uploader:
     def __init__(self):
-        self.conn = psycopg2.connect("postgresql://alipa:Gargi1002#@dpg-ctohkfd2ng1s73biuvr0-a.oregon-postgres.render.com/rfi_agent")
+        self.conn = psycopg2.connect("postgresql://palcode_ai:blaash@dpg-ctohkfd2ng1s73biuvr0-a.oregon-postgres.render.com/rfi_agent")
         self.cursor = self.conn.cursor()
     def rfi_uploader(self,datas):
         table = "rfis"
@@ -78,7 +78,7 @@ class Uploader:
 class Fetcher:
 
     def __init__(self):
-        self.conn = psycopg2.connect("postgresql://alipa:Gargi1002#@dpg-ctohkfd2ng1s73biuvr0-a.oregon-postgres.render.com/rfi_agent")
+        self.conn = psycopg2.connect("postgresql://palcode_ai:blaash@dpg-ctohkfd2ng1s73biuvr0-a.oregon-postgres.render.com/rfi_agent")
         self.cursor = self.conn.cursor()
 
     def list_rfi(self, project_id):
