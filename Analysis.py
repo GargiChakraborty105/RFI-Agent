@@ -119,12 +119,12 @@ class AssignAssistance:
             # Weighted score: similarity (70%), experience (20%), workload penalty (10%)
             weighted_score = (0.6 * similarity*100) + (0.395 * experience_score*100) + (0.005*((1-normalized_workload)))
             
-            print(f'User name: {user['name']}, rfi_id: {rfi['id']}, Similarities: {similarity}, experience score: {experience_score}, current Workload: {user['current_workload']}, Normalized Workload: {normalized_workload}, Weighted Score: {weighted_score}')
+            #print(f'User name: {user['name']}, rfi_id: {rfi['id']}, Similarities: {similarity}, experience score: {experience_score}, current Workload: {user['current_workload']}, Normalized Workload: {normalized_workload}, Weighted Score: {weighted_score}')
             # Append data for each user
             similarities.append({
                 'user_id': user['user_id'],
                 'name': user['name'],
-                'confidence': weighted_score,  # Convert to percentage
+                'confidence': float(weighted_score),  # Convert to percentage
                 'workload': user['current_workload'],
                 'reason': keywords
             })
