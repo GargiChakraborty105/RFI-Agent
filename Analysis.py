@@ -1,3 +1,4 @@
+
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -63,10 +64,29 @@ class AssignAssistance:
         return similarity_matrix[0][0]
 
     def extract_keywords(self, rfi_questions, job_title):
-        """Extract overlapping keywords between RFI questions and user job title."""
-        rfi_words = set(' '.join(rfi_questions).lower().split())
-        job_title_words = set(job_title.lower().split())
-        return list(rfi_words.intersection(job_title_words))
+        """Extract overlapping keywords between RFI questions and user job title using TF-IDF."""
+        # Combine the questions into a single string
+        rfi_text = ' '.join(rfi_questions)
+        
+        # Create a TF-IDF vectorizer to get the most important terms
+        tfidf_vectorizer = TfidfVectorizer(stop_words='english', ngram_range=(1, 2))  # Use unigrams and bigrams
+        tfidf_matrix = tfidf_vectorizer.fit_transform([rfi_text, job_title])
+        
+        # Get the feature names (terms)
+        feature_names = tfidf_vectorizer.get_feature_names_out()
+        
+        # Get the importance scores for each term
+        importance_scores = tfidf_matrix.sum(axis=0).A1  # Sum over the rows
+        
+        # Create a dictionary of term -> importance score
+        term_importance = dict(zip(feature_names, importance_scores))
+        
+        # Sort terms by importance (descending)
+        sorted_terms = sorted(term_importance.items(), key=lambda x: x[1], reverse=True)
+        
+        # Return the top 5 most important terms as keywords
+        top_keywords = [term for term, _ in sorted_terms[:5]]
+        return top_keywords
 
     def calculate_experience_score(self, rfi_text, previous_rfi_data):
         """Calculate experience score based on user's previous RFIs."""
@@ -107,6 +127,7 @@ class AssignAssistance:
         # Sort users by confidence and workload (lower workload preferred)
         sorted_assignees = sorted(similarities, key=lambda x: (-x['confidence'], x['workload']))
         return sorted_assignees[:3]  # Return top 3 suggestions
+
 
 # Example Usage
 
