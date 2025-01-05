@@ -112,8 +112,13 @@ class AssignAssistance:
             experience_score = self.calculate_experience_score(rfi_text, user.get('previous_rfi_data', []))
             keywords = self.extract_keywords(rfi['questions_body'], user['job_title'])
             
-            # Weighted score: similarity (70%), experience (20%), workload penalty (10%)
-            weighted_score = 0.7 * similarity + 0.2 * experience_score - 0.1 * user['current_workload']
+            # Weighted score: similarity (70%), experience (20%), workload penalty (20%)
+
+            weighted_score = 0.7 * similarity + 0.2 * experience_score - 0.02 * user['current_workload']
+
+            # Ensure the score is non-negative (you can adjust this threshold as needed)
+            weighted_score = max(0, weighted_score)
+
             
             # Append data for each user
             similarities.append({
