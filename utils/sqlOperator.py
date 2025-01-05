@@ -68,7 +68,38 @@ class Uploader:
             except Exception as e:
                 self.conn.rollback()
                 print(f"An unexpected error occurred: {e}")
-        
+    
+    def user_uploader(self, datas):
+        table = "user_data"
+        attributes = [
+            'id', 'name', 'email', 'phone_number', 'job_title', 'company', 'current_workload', 'historical_performance'
+        ]
+        for data in datas:
+            try:
+                values = []
+                for x in attributes:
+                    print(f'operating on {x}')
+                    values.append(data[x])
+                    print(type(data[x]))
+                
+                columns = ', '.join(attributes)
+                placeholders = ', '.join(['%s'] * len(attributes))
+                values = tuple(values)
+                print(len(columns),len(values))
+                query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders});"
+                
+                self.cursor.execute(query, values)
+                
+                self.conn.commit()
+
+                print("Data inserted successfully!")
+            except psycopg2.IntegrityError as e:
+                self.conn.rollback()
+                print(f"Already existed data: {e}")
+            
+            except Exception as e:
+                self.conn.rollback()
+                print(f"An unexpected error occurred: {e}")
         
     def close_connection(self):
         self.cursor.close()
