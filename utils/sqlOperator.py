@@ -72,11 +72,12 @@ class Uploader:
     def user_uploader(self, datas):
         table = "user_data"
         attributes = [
-            'id', 'name', 'email', 'phone_number', 'job_title', 'company', 'current_workload', 'historical_performance'
+            'id', 'name', 'email_address', 'mobile_phone', 'job_title', 'current_workload', 'historical_performance_score', 'company_id'
         ]
         for data in datas:
             try:
                 values = []
+                print(f'data: {data}')
                 for x in attributes:
                     print(f'operating on {x}')
                     values.append(data[x])
@@ -94,10 +95,12 @@ class Uploader:
 
                 print("Data inserted successfully!")
             except psycopg2.IntegrityError as e:
+                print(f'data: {data}')
                 self.conn.rollback()
                 print(f"Already existed data: {e}")
             
             except Exception as e:
+                print(f'data: {data}')
                 self.conn.rollback()
                 print(f"An unexpected error occurred: {e}")
         
@@ -136,6 +139,54 @@ class Fetcher:
             result = {c: r for c,r in zip(project_fields,list(project_instance))}
             projects.append(result)
         return projects
+
+    def current_workload_calculator(self,user_id):
+        query = """
+        SELECT 
+            COUNT(*) AS current_workload
+        FROM 
+            rfis
+        WHERE 
+            status = 'open'
+            AND %s = ANY(assignees_id); 
+        """
+
+        # Define the specific assignee ID you want to query  # Replace with your desired ID
+
+        # Execute the query with the parameter
+        self.cursor.execute(query, (user_id,))
+
+        self.conn.commit()
+
+        current_workload = self.cursor.fetchall()
+
+        return current_workload[0][0]
+
+    def historical_performance_calculator(self,user_id):
+        query = """
+        SELECT 
+            ROUND(
+                SUM(CASE WHEN updated_at <= due_date THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2
+            ) AS historical_performance_score
+        FROM 
+            rfis,
+            UNNEST(assignees_id) AS individual_assignee_id
+        WHERE 
+            status = 'closed'
+            AND individual_assignee_id = %s -- Filter for the specific user ID
+        """
+
+
+        # Define the specific assignee ID you want to query  # Replace with your desired ID
+
+        # Execute the query with the parameter
+        self.cursor.execute(query, (user_id,))
+
+        self.conn.commit()
+
+        performance = self.cursor.fetchall()
+
+        return performance[0][0]
 
 
     def close_connection(self):

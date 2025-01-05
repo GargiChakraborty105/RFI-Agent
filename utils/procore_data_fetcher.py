@@ -53,3 +53,12 @@ class Procore:
             print(f"JSON Parsing Error while fetching companies: {err}")
             print("Response Text:", response.text)
             raise
+
+    def fetch_company_users(self, company_id):
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Procore-Company-Id" : f'{company_id}'
+        }
+        response = requests.get(f"https://sandbox.procore.com//rest/v1.3/companies/{company_id}/users", headers=headers)
+        
+        return response.json()

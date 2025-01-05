@@ -68,6 +68,38 @@ async def initialise_database():
         print("Error processing request:", e)
         raise HTTPException(status_code=500, detail={"status": "error", "message": str(e)})
 
+@app.get('/initialize_user_table')
+async def initialize_user_table():
+    try:
+        upload = Uploader()
+        fetcher = Fetcher()
+        procore_fetch = Procore()
+        print('\n\nFetching Company\n')
+        companies = procore_fetch.fetch_companies()
+        print("Companies:", companies)
+        company_ids = [companies[x]["id"] for x in range(len(companies))]
+        for company_id in company_ids:
+            print('\n\nFetching Users\n')
+            users = procore_fetch.fetch_company_users(company_id)
+            print(users)
+            if len(users)<1:
+                continue
+            if type(users) != list:
+                continue
+            print(f"rfis : {users}")
+            print(type(users))
+            print("Users:", users)
+            print(len(users))
+            for user in users:
+                user['current_workload'] = fetcher.current_workload_calculator(user['id'])
+                user['historical_performance_score'] = fetcher.historical_performance_calculator(user['id'])
+                user['company_id'] = company_id
+            print('\n\nUploaading Users\n')
+            upload.user_uploader(users)
+        return {'status' : 200, 'message': "RFI Table Updated Successfully"}
+    except Exception as e:
+        print("Error processing request:", e)
+        raise HTTPException(status_code=500, detail={"status": "error", "message": str(e)})
 
 
 if __name__ == "__main__":

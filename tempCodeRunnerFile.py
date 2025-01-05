@@ -7,12 +7,15 @@ cursor = conn.cursor()
 # Define the query with a parameterized placeholder
 query = """
 SELECT 
-    COUNT(*) AS current_workload
+    ROUND(
+        SUM(CASE WHEN updated_at <= due_date THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2
+    ) AS historical_performance_score
 FROM 
-    rfis
+    rfis,
+    UNNEST(assignees_id) AS individual_assignee_id
 WHERE 
-    status = 'open'
-    AND %s = ANY(assignees_id); 
+    status = 'closed'
+    AND individual_assignee_id = %s -- Filter for the specific user ID
 """
 
 # Define the specific assignee ID you want to query
@@ -25,7 +28,7 @@ conn.commit()
 
 project_instance = cursor.fetchall()
 
-print(project_instance)
+print(project_instance[0][0])
 
 cursor.close()
 
