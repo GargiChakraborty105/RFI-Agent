@@ -8,7 +8,7 @@ import requests
 CLIENT_ID = "atpQwDiOJKEvGA35HP_dlcavpqa56b6v1gZbIWvrcRA"
 CLIENT_SECRET = "GjVONicEuD1_CUDrh5qU5XxPo7VV-VpD2R8u-_GTgvk"
 REDIRECT_URI = "http://localhost/callback"  # Same as what you provided during app creation
-AUTH_CODE = "gDWzXQ1SYm_Jiw1f5Q-k-rdzH8EztCHGiF6Oy5S10kk"
+AUTH_CODE = "mAIbX0pBq-kI5yz6yCJPBKtesoA7l8yk8OubcJzuhdI"
 
 TOKEN_URL = "https://sandbox.procore.com/oauth/token"
 

@@ -33,5 +33,23 @@ class Procore:
             "Procore-Company-Id": f"{company_id}"
         }
         # try:
-        response = requests.get(f"http://sandbox.procore.com/rest/v1.0/projects/{project_id}/rfis",headers=headers)
+        response = requests.get(f"https://sandbox.procore.com/rest/v1.0/projects/{project_id}/rfis",headers=headers)
         return response.json()
+    
+    def fetch_companies(self):
+        headers = {
+            "Authorization": f"Bearer {self.access_token}"
+        }
+        response = requests.get(f"https://sandbox.procore.com/rest/v1.0/companies", headers=headers)
+        try:
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.HTTPError as err:
+            print(f"HTTP Error while fetching companies: {err}")
+            print("Response Status Code:", response.status_code)
+            print("Response Text:", response.text)
+            raise
+        except ValueError as err:
+            print(f"JSON Parsing Error while fetching companies: {err}")
+            print("Response Text:", response.text)
+            raise
