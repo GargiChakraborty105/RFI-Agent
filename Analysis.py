@@ -105,21 +105,25 @@ class AssignAssistance:
         """Rank top 3 potential assignees based on similarity to RFI text, workload, and experience."""
         rfi_text = rfi['subject'] + ' ' + ' '.join(rfi['questions_body'])
         similarities = []
+        max_workload = max(user['current_workload'] for _, user in self.user_df.iterrows())
+        min_workload = min(user['current_workload'] for _, user in self.user_df.iterrows())
         
         for _, user in self.user_df.iterrows():
             # Calculate similarity and extract relevant keywords
             similarity = self.calculate_similarity(rfi_text, user['job_title'])
             experience_score = self.calculate_experience_score(rfi_text, user.get('previous_rfi_data', []))
             keywords = self.extract_keywords(rfi['questions_body'], user['job_title'])
+            normalized_workload = (user['current_workload']-max_workload)/(max_workload-min_workload)
             print(f'Similarities: {similarity}, experience score: {experience_score}, current Workload: {user['current_workload']}')
+            
             # Weighted score: similarity (70%), experience (20%), workload penalty (10%)
-            weighted_score = 0.6 * similarity + 0.4 * experience_score
+            weighted_score = (0.6 * similarity*100) + (0.3 * experience_score*100) + (0.1*((1-normalized_workload)*100))
             
             # Append data for each user
             similarities.append({
                 'user_id': user['user_id'],
                 'name': user['name'],
-                'confidence': int(weighted_score * 100),  # Convert to percentage
+                'confidence': int(weighted_score),  # Convert to percentage
                 'workload': user['current_workload'],
                 'reason': keywords
             })
