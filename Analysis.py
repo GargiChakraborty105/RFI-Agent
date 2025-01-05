@@ -40,10 +40,11 @@ class RfiAnalysis:
             
             # Append the results as a dictionary
             analysis_results.append({
-                "rfi_id": rfi['id'],
+                "id": rfi['id'],
                 "sentiment_score": sentiment_score,
                 "urgency_score": urgency_score,
-                "predicted_resolution_time": resolution_time
+                "predicted_resolution_time": resolution_time,
+                "subject": rfi['subject']
             })
         
         return pd.DataFrame(analysis_results).to_dict(orient="records")
@@ -113,17 +114,17 @@ class AssignAssistance:
             similarity = self.calculate_similarity(rfi_text, user['job_title'])
             experience_score = self.calculate_experience_score(rfi_text, user.get('previous_rfi_data', []))
             keywords = self.extract_keywords(rfi['questions_body'], user['job_title'])
-            normalized_workload = (user['current_workload']-max_workload)/(max_workload-min_workload)
-            print(f'Similarities: {similarity}, experience score: {experience_score}, current Workload: {user['current_workload']}')
+            normalized_workload = (user['current_workload']-min_workload)/(max_workload-min_workload)
             
             # Weighted score: similarity (70%), experience (20%), workload penalty (10%)
-            weighted_score = (0.6 * similarity*100) + (0.3 * experience_score*100) + (0.1*((1-normalized_workload)*100))
+            weighted_score = (0.6 * similarity*100) + (0.395 * experience_score*100) + (0.005*((1-normalized_workload)))
             
+            print(f'User name: {user['name']}, rfi_id: {rfi['id']}, Similarities: {similarity}, experience score: {experience_score}, current Workload: {user['current_workload']}, Normalized Workload: {normalized_workload}, Weighted Score: {weighted_score}')
             # Append data for each user
             similarities.append({
                 'user_id': user['user_id'],
                 'name': user['name'],
-                'confidence': int(weighted_score),  # Convert to percentage
+                'confidence': weighted_score,  # Convert to percentage
                 'workload': user['current_workload'],
                 'reason': keywords
             })
@@ -131,14 +132,14 @@ class AssignAssistance:
         # Step 2: Sort users by the weighted score (descending order)
         sorted_by_weighted_score = sorted(similarities, key=lambda x: x['confidence'], reverse=True)
 
-    # Step 3: Take top 5 users based on weighted score
-        top_5_users = sorted_by_weighted_score[:5]
+    # # Step 3: Take top 5 users based on weighted score
+        # top_5_users = sorted_by_weighted_score[:5]
 
-    # Step 4: Sort the top 5 users by workload (ascending order)
-        sorted_top_5_by_workload = sorted(top_5_users, key=lambda x: x['workload'])
+    # # Step 4: Sort the top 5 users by workload (ascending order)
+    #     sorted_top_5_by_workload = sorted(top_5_users, key=lambda x: x['workload'])
 
     # Return the top 3 users from the sorted top 5
-        return sorted_top_5_by_workload[:3]
+        return sorted_by_weighted_score[:3]
 
 
 

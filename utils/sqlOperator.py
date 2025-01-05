@@ -103,6 +103,42 @@ class Uploader:
                 print(f'data: {data}')
                 self.conn.rollback()
                 print(f"An unexpected error occurred: {e}")
+
+    def analytics_uploader(self,datas):
+        table = "analytics_data"
+        attributes = [
+            'rfi_id', 'sentiment_score', 'urgency_score', 'resolution_time', 'subject'
+        ]
+        for data in datas:
+            try:
+                values = []
+                print(f'data: {data}')
+                for x in attributes:
+                    print(f'operating on {x}')
+                    values.append(data[x])
+                    print(type(data[x]))
+                
+                columns = ', '.join(attributes)
+                placeholders = ', '.join(['%s'] * len(attributes))
+                values = tuple(values)
+                print(len(columns),len(values))
+                query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders});"
+                
+                self.cursor.execute(query, values)
+                
+                self.conn.commit()
+
+                print("Data inserted successfully!")
+            except psycopg2.IntegrityError as e:
+                print(f'data: {data}')
+                self.conn.rollback()
+                print(f"Already existed data: {e}")
+            
+            except Exception as e:
+                print(f'data: {data}')
+                self.conn.rollback()
+            print(f"An unexpected error occurred: {e}")
+
         
     def close_connection(self):
         self.cursor.close()
@@ -123,7 +159,7 @@ class Fetcher:
         for rfi_instance in rfi_instances:
             result = {c: r for c,r in zip(rfi_fields,list(rfi_instance))}
             rfis.append(result)
-        self.cursor.execute(f"SELECT * FROM projects WHERE id={project_id}")
+        self.cursor.execute(f"SELECT id, name FROM projects WHERE id={project_id}")
         project_fields = [desc[0] for desc in self.cursor.description]
         project_instance = self.cursor.fetchall()
         result = {c:r for c,r in zip(project_fields, project_instance[0])}
@@ -139,6 +175,16 @@ class Fetcher:
             result = {c: r for c,r in zip(project_fields,list(project_instance))}
             projects.append(result)
         return projects
+    
+    def list_analytics(self, rfi_id):
+        self.cursor.execute(f"SELECT * FROM analytics_data WHERE company_id={rfi_id}")
+        analytics_fields = [desc[0] for desc in self.cursor.description]
+        analytics_instances = self.cursor.fetchall()
+        analytics = []
+        for analytics_instance in analytics_instances:
+            result = {c: r for c,r in zip(analytics_fields,list(analytics_instance))}
+            analytics.append(result)
+        return analytics
 
     def current_workload_calculator(self,user_id):
         query = """
