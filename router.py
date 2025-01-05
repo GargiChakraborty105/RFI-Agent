@@ -63,6 +63,7 @@ async def initialise_database():
                 
                 upload.rfi_uploader(rfis)
             upload.projects_uploader(projects)
+        upload.close_connection()
         return {'status' : 200, 'message': "RFI Table Updated Successfully"}
     except Exception as e:
         print("Error processing request:", e)
@@ -96,6 +97,8 @@ async def initialize_user_table():
                 user['company_id'] = company_id
             print('\n\nUploaading Users\n')
             upload.user_uploader(users)
+        upload.close_connection()
+        fetcher.close_connection()
         return {'status' : 200, 'message': "RFI Table Updated Successfully"}
     except Exception as e:
         print("Error processing request:", e)
