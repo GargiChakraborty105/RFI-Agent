@@ -111,6 +111,12 @@ class AssignAssistance:
             # Calculate similarity and experience score
             similarity = self.calculate_similarity(rfi_text, user['job_title'])
             experience_score = self.calculate_experience_score(rfi_text, user.get('previous_rfi_data', []))
+<<<<<<< Updated upstream
+=======
+            keywords = self.extract_keywords(rfi['questions_body'], user['job_title'])
+            print(f'Similarities: {similarity}, experience score: {experience_score}, current Workload: {user['current_workload']}')
+            # Weighted score: similarity (70%), experience (20%), workload penalty (20%)
+>>>>>>> Stashed changes
 
         # Calculate weighted score (60% similarity, 40% experience)
             weighted_score = 0.6 * similarity + 0.4 * experience_score
