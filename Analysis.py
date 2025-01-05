@@ -102,31 +102,30 @@ class AssignAssistance:
         return np.mean(scores) if scores else 0
 
     def suggest_top_assignees(self, rfi):
-        """Rank top 3 potential assignees based on similarity to RFI text, experience, and workload."""
+        """Rank top 3 potential assignees based on similarity to RFI text, workload, and experience."""
         rfi_text = rfi['subject'] + ' ' + ' '.join(rfi['questions_body'])
-        user_scores = []
-
-    # Step 1: Calculate weighted scores based on similarity and experience
+        similarities = []
+        
         for _, user in self.user_df.iterrows():
-            # Calculate similarity and experience score
+            # Calculate similarity and extract relevant keywords
             similarity = self.calculate_similarity(rfi_text, user['job_title'])
             experience_score = self.calculate_experience_score(rfi_text, user.get('previous_rfi_data', []))
-
-        # Calculate weighted score (60% similarity, 40% experience)
+            keywords = self.extract_keywords(rfi['questions_body'], user['job_title'])
+            
+            # Weighted score: similarity (70%), experience (20%), workload penalty (10%)
             weighted_score = 0.6 * similarity + 0.4 * experience_score
-
-        # Append user data with the weighted score
-            user_scores.append({
-            'user_id': user['user_id'],
-            'name': user['name'],
-            'confidence': weighted_score,
-            'workload': user['current_workload'],
-            'similarity': similarity,
-            'experience_score': experience_score
-        })
-
-    # Step 2: Sort users by the weighted score (descending order)
-        sorted_by_weighted_score = sorted(user_scores, key=lambda x: x['confidence'], reverse=True)
+            
+            # Append data for each user
+            similarities.append({
+                'user_id': user['user_id'],
+                'name': user['name'],
+                'confidence': int(weighted_score * 100),  # Convert to percentage
+                'workload': user['current_workload'],
+                'reason': keywords
+            })
+        
+        # Step 2: Sort users by the weighted score (descending order)
+        sorted_by_weighted_score = sorted(similarities, key=lambda x: x['confidence'], reverse=True)
 
     # Step 3: Take top 5 users based on weighted score
         top_5_users = sorted_by_weighted_score[:5]
@@ -136,6 +135,7 @@ class AssignAssistance:
 
     # Return the top 3 users from the sorted top 5
         return sorted_top_5_by_workload[:3]
+
 
 
 # Example Usage
