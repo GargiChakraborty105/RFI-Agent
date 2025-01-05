@@ -7,16 +7,16 @@ from textblob import TextBlob
 
 # Sample User Data
 user_data = [
-    {"user_id": 101, "name": "John Doe", "job_title": "Project Manager", "current_workload": 3, "historical_performance_score": 0.85, "expertise": ["project management", "material delay", "team leadership"]},
-    {"user_id": 102, "name": "Alice Smith", "job_title": "Electrical Engineer", "current_workload": 2, "historical_performance_score": 0.92, "expertise": ["electrical wiring", "technical clarification", "circuit design"]},
-    {"user_id": 103, "name": "Bob Johnson", "job_title": "Mechanical Engineer", "current_workload": 4, "historical_performance_score": 0.80, "expertise": ["mechanical design", "CAD", "construction"]},
-    {"user_id": 104, "name": "Carol Williams", "job_title": "Civil Engineer", "current_workload": 5, "historical_performance_score": 0.75, "expertise": ["structural design", "construction", "site management"]},
-    {"user_id": 105, "name": "David Lee", "job_title": "Quality Assurance", "current_workload": 1, "historical_performance_score": 0.95, "expertise": ["quality control", "testing", "process improvement"]},
-    {"user_id": 106, "name": "Emma Moore", "job_title": "Software Developer", "current_workload": 6, "historical_performance_score": 0.78, "expertise": ["software development", "web applications", "JavaScript"]},
-    {"user_id": 107, "name": "Frank Harris", "job_title": "Data Scientist", "current_workload": 3, "historical_performance_score": 0.90, "expertise": ["data analysis", "machine learning", "statistics"]},
-    {"user_id": 108, "name": "Grace Clark", "job_title": "HR Manager", "current_workload": 4, "historical_performance_score": 0.88, "expertise": ["HR management", "employee relations", "recruitment"]},
-    {"user_id": 109, "name": "Henry Lewis", "job_title": "Business Analyst", "current_workload": 2, "historical_performance_score": 0.85, "expertise": ["business analysis", "requirements gathering", "process optimization"]},
-    {"user_id": 110, "name": "Ivy Walker", "job_title": "Marketing Specialist", "current_workload": 3, "historical_performance_score": 0.80, "expertise": ["marketing", "digital campaigns", "brand management"]}
+    {"user_id": 101, "name": "John Doe", "job_title": "Project Manager", "current_workload": 3, "historical_performance_score": 0.85},
+    {"user_id": 102, "name": "Alice Smith", "job_title": "Electrical Engineer", "current_workload": 2, "historical_performance_score": 0.92},
+    {"user_id": 103, "name": "Bob Johnson", "job_title": "Mechanical Engineer", "current_workload": 4, "historical_performance_score": 0.80},
+    {"user_id": 104, "name": "Carol Williams", "job_title": "Civil Engineer", "current_workload": 5, "historical_performance_score": 0.75},
+    {"user_id": 105, "name": "David Lee", "job_title": "Quality Assurance", "current_workload": 1, "historical_performance_score": 0.95},
+    {"user_id": 106, "name": "Emma Moore", "job_title": "Software Developer", "current_workload": 6, "historical_performance_score": 0.78},
+    {"user_id": 107, "name": "Frank Harris", "job_title": "Data Scientist", "current_workload": 3, "historical_performance_score": 0.90},
+    {"user_id": 108, "name": "Grace Clark", "job_title": "HR Manager", "current_workload": 4, "historical_performance_score": 0.88},
+    {"user_id": 109, "name": "Henry Lewis", "job_title": "Business Analyst", "current_workload": 2, "historical_performance_score": 0.85},
+    {"user_id": 110, "name": "Ivy Walker", "job_title": "Marketing Specialist", "current_workload": 3, "historical_performance_score": 0.80}
 ]
 
 # Sample RFI Data
@@ -79,21 +79,28 @@ class RfiAnalysis:
                 "predicted_resolution_time": resolution_time
             })
         
-        return pd.DataFrame(analysis_results)
+        return pd.DataFrame(analysis_results).to_dict(orient="records")
 
 class AssignAssistance:
     def __init__(self, user_data, rfi_data):
         self.user_df = pd.DataFrame(user_data)
         self.rfi_df = pd.DataFrame(rfi_data)
 
-    def calculate_similarity(self, rfi_text, expertise):
-        """Measure similarity between RFI and user expertise using TF-IDF and cosine similarity"""
-        all_expertise = [' '.join(expert) for expert in expertise]
+    def calculate_similarity(self, rfi_text, job_title):
+        """Measure similarity between RFI text and user job title using TF-IDF and cosine similarity"""
         tfidf_vectorizer = TfidfVectorizer(stop_words='english')
-        all_text = [rfi_text] + all_expertise
+        all_text = [rfi_text, job_title]
         tfidf_matrix = tfidf_vectorizer.fit_transform(all_text)
         similarity_matrix = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:])
-        return similarity_matrix[0]
+        return similarity_matrix[0][0]
+
+    def extract_keywords(self, rfi_questions, job_title):
+        """Extract overlapping keywords between RFI questions and user job title"""
+        keywords = []
+        rfi_words = set(' '.join(rfi_questions).lower().split())
+        job_title_words = set(job_title.lower().split())
+        keywords = rfi_words.intersection(job_title_words)
+        return list(keywords)
 
     def suggest_top_assignees(self, rfi):
         """Rank top 3 potential assignees based on similarity to RFI text and current workload"""
@@ -101,15 +108,18 @@ class AssignAssistance:
         similarities = []
         
         for _, user in self.user_df.iterrows():
-            similarity = self.calculate_similarity(rfi_text, user['expertise'])
+            similarity = self.calculate_similarity(rfi_text, user['job_title'])
+            keywords = self.extract_keywords(rfi['questions_body'], rfi['subject'])
             similarities.append({
                 'user_id': user['user_id'],
-                'similarity_score': np.mean(similarity),  # Averaging similarity score
-                'workload': user['current_workload']
+                'name': user['name'],
+                'confidence': int(similarity * 100),  # Convert to integer percentage
+                'workload': user['current_workload'],
+                'reason': keywords
             })
         
         # Sort by similarity score and workload, prioritize users with lower workload
-        sorted_assignees = sorted(similarities, key=lambda x: (x['similarity_score'], x['workload']))
+        sorted_assignees = sorted(similarities, key=lambda x: (-x['confidence'], x['workload']))
         top_assignees = sorted_assignees[:3]  # Get top 3 assignees
         return top_assignees
 
@@ -117,10 +127,12 @@ class AssignAssistance:
 
 # Analyze all RFIs
 rfi_analysis = RfiAnalysis(rfi_data)
-analysis_df = rfi_analysis.run_analysis()
-print("RFI Analysis Results:\n", analysis_df)
+analysis_dict = rfi_analysis.run_analysis()
+print("RFI Analysis Results:", analysis_dict)
 
 # Suggest assignees for an RFI (using the first RFI in the list as an example)
 assign_assistance = AssignAssistance(user_data, rfi_data)
-top_assignees = assign_assistance.suggest_top_assignees(rfi_data[0])  # First RFI as an example
-print("Suggested Assignees:\n", top_assignees)
+dashboard_dict = {
+    rfi['id']: assign_assistance.suggest_top_assignees(rfi) for rfi in rfi_data
+}
+print("\n\nSuggested Assignees Dashboard:", dashboard_dict)
