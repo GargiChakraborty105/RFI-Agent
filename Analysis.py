@@ -119,6 +119,8 @@ class AssignAssistance:
             # Ensure the score is non-negative (you can adjust this threshold as needed)
             weighted_score = max(0, weighted_score)
 
+            #hello golu
+
             
             # Append data for each user
             similarities.append({
