@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Query
 from utils.sqlOperator import Fetcher, Uploader
 from utils.procore_data_fetcher import Procore
 from Analysis import RfiAnalysis
+from datetime import datetime, timedelta
 
 app = FastAPI()
 
@@ -62,16 +63,27 @@ async def initialise_analytics_table():
                     continue
                 print(f"rfis : {rfis}")
                 print(type(rfis))
-                for x in rfis:
+                i = 0
+                while i < len(rfis):
+                    x = rfis[i]
+                    if x['status'] == 'closed':
+                        print(f'removed: {x}')
+                        rfis.remove(x)
+                        continue
                     print(type(x))
                     x['project_id'] = project_id
                     x['assignees_name'] = [y['name'] for y in x['assignees']]
                     x['assignees_id'] = [y['id'] for y in x['assignees']]
                     x['priority_name'] = x['priority']['name']
-                    x['priority_value'] = x['priority']['value']
+                    x['priority_value'] = x['priority']['value'] if x['priority']['value'] is not None else 0
                     x['questions_body'] = [y['body'] for y in x['questions']]
+                    print("converting dates")
+                    x['updated_at'] = datetime.strptime(x['updated_at'], '%Y-%m-%dT%H:%M:%SZ')
+                    x['due_date'] = datetime.strptime(x['due_date'], '%Y-%m-%d')
+                    i+=1
                 print(rfis)
-                analyser = RfiAnalysis()
+                
+                analyser = RfiAnalysis(rfis)
                 analytics = analyser.run_analysis()
 
                 upload.analytics_uploader(analytics)

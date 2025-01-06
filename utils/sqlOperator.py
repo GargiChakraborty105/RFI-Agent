@@ -137,7 +137,7 @@ class Uploader:
             except Exception as e:
                 print(f'data: {data}')
                 self.conn.rollback()
-            print(f"An unexpected error occurred: {e}")
+                print(f"An unexpected error occurred: {e}")
 
         
     def close_connection(self):

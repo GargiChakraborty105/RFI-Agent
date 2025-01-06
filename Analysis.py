@@ -40,10 +40,10 @@ class RfiAnalysis:
             
             # Append the results as a dictionary
             analysis_results.append({
-                "id": rfi['id'],
+                "rfi_id": rfi['id'],
                 "sentiment_score": sentiment_score,
                 "urgency_score": urgency_score,
-                "predicted_resolution_time": resolution_time,
+                "resolution_time": resolution_time,
                 "subject": rfi['subject']
             })
         
