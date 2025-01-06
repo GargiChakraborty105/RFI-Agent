@@ -25,16 +25,24 @@ async def get_projects(company_id: int, project_id: int):
     try:
         fetch = Fetcher()
         results = fetch.list_rfi(project_id)
-        fetch.close_connection()
+        print(f'results: {results}')
         rfi_counts = len(results['rfis'])
+        print(rfi_counts)
         results['rfi_counts'] = rfi_counts
         users = fetch.list_user(company_id)
+        print(f'users: {users}')
+        for user in users: 
+            user['previous_rfi_data'] = fetch.list_prev_rfi(user['id'])
         rfis = []
         for rfi in results['rfis']:
-            analytics = fetch.list_analytics(rfi['id'])
+            print('getting rfi analytics')
+            analytic = fetch.list_analytics(rfi['id'])[0]
             assigner = AssignAssistance(users, [rfi])
-            analytics
-            rfis.append(analytics)
+            print('getting suggested assignees')
+            suggestion = assigner.suggest_top_assignees(rfi)
+            analytic['suggested_assignees'] = suggestion
+            rfis.append(analytic)
+        print('setting rfi analytics to rfis')
         results['rfis'] = rfis
 
         return {"status": "success", "data": results}

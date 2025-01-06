@@ -151,6 +151,19 @@ class Fetcher:
         self.conn = psycopg2.connect("postgresql://palcode_ai:blaash@dpg-ctohkfd2ng1s73biuvr0-a.oregon-postgres.render.com/rfi_agent")
         self.cursor = self.conn.cursor()
 
+    def list_prev_rfi(self, user_id):
+        self.cursor.execute(f"""SELECT subject, questions_body 
+                                FROM rfis 
+                                WHERE {user_id} = ANY(assignees_id);
+                                """)
+        rfi_fields = [desc[0] for desc in self.cursor.description]
+        rfi_instances = self.cursor.fetchall()
+        rfis = []
+        for rfi_instance in rfi_instances:
+            result = {c: r for c,r in zip(rfi_fields,list(rfi_instance))}
+            rfis.append(result)
+        return rfis
+
     def list_rfi(self, project_id):
         self.cursor.execute(f"SELECT * FROM rfis WHERE project_id={project_id}")
         rfi_fields = [desc[0] for desc in self.cursor.description]
@@ -177,7 +190,7 @@ class Fetcher:
         return projects
     
     def list_analytics(self, rfi_id):
-        self.cursor.execute(f"SELECT * FROM analytics_data WHERE company_id={rfi_id}")
+        self.cursor.execute(f"SELECT * FROM analytics_data WHERE rfi_id={rfi_id}")
         analytics_fields = [desc[0] for desc in self.cursor.description]
         analytics_instances = self.cursor.fetchall()
         analytics = []
