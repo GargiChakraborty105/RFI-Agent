@@ -33,11 +33,13 @@ async def get_projects(company_id: int, project_id: int):
         print(f'users: {users}')
         for user in users: 
             user['previous_rfi_data'] = fetch.list_prev_rfi(user['id'])
+            user['job_title'] = '' if user['job_title'] is None else user['job_title']
         rfis = []
         for rfi in results['rfis']:
             print('getting rfi analytics')
             analytic = fetch.list_analytics(rfi['id'])[0]
-            assigner = AssignAssistance(users, [rfi])
+            assigner = AssignAssistance(users, rfi)
+            print(f'rfi: {rfi}')
             print('getting suggested assignees')
             suggestion = assigner.suggest_top_assignees(rfi)
             analytic['suggested_assignees'] = suggestion
