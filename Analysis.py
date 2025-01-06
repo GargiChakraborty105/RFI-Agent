@@ -43,8 +43,7 @@ class RfiAnalysis:
                 "rfi_id": rfi['id'],
                 "sentiment_score": sentiment_score,
                 "urgency_score": urgency_score,
-                "resolution_time": resolution_time,
-                "subject": rfi['subject']
+                "resolution_time": resolution_time
             })
         
         return pd.DataFrame(analysis_results).to_dict(orient="records")
@@ -103,43 +102,51 @@ class AssignAssistance:
         return np.mean(scores) if scores else 0
 
     def suggest_top_assignees(self, rfi):
-        """Rank top 3 potential assignees based on similarity to RFI text, workload, and experience."""
-        rfi_text = rfi['subject'] + ' ' + ' '.join(rfi['questions_body'])
-        similarities = []
-        max_workload = max(user['current_workload'] for _, user in self.user_df.iterrows())
-        min_workload = min(user['current_workload'] for _, user in self.user_df.iterrows())
+            """Rank top 3 potential assignees based on similarity to RFI text, workload, and experience."""
+            rfi_text = rfi['subject'] + ' ' + ' '.join(rfi['questions_body'])
+            similarities = []
         
-        for _, user in self.user_df.iterrows():
-            # Calculate similarity and extract relevant keywords
-            similarity = self.calculate_similarity(rfi_text, user['job_title'])
-            experience_score = self.calculate_experience_score(rfi_text, user.get('previous_rfi_data', []))
-            keywords = self.extract_keywords(rfi['questions_body'], user['job_title'])
-            normalized_workload = (user['current_workload']-min_workload)/(max_workload-min_workload)
+        # Fetch workload bounds
+            max_workload = max(user['current_workload'] for _, user in self.user_df.iterrows())
+            min_workload = min(user['current_workload'] for _, user in self.user_df.iterrows())
+        
+            weighted_scores = []  # Collect scores for normalization
+        
+            for _, user in self.user_df.iterrows():
+                # Calculate similarity and extract relevant keywords
+                similarity = self.calculate_similarity(rfi_text, user['job_title'])
+                experience_score = self.calculate_experience_score(rfi_text, user.get('previous_rfi_data', []))
+                keywords = self.extract_keywords(rfi['questions_body'], user['job_title'])
+                normalized_workload = (user['current_workload'] - min_workload) / (max_workload - min_workload)
             
             # Weighted score: similarity (70%), experience (20%), workload penalty (10%)
-            weighted_score = (0.6 * similarity*100) + (0.395 * experience_score*100) + (0.005*((1-normalized_workload)))
+                weighted_score = (0.6 * similarity * 100) + (0.395 * experience_score * 100) + (0.005 * (1 - normalized_workload))
+                weighted_scores.append(weighted_score)  # Collect scores for normalization
             
-            #print(f'User name: {user['name']}, rfi_id: {rfi['id']}, Similarities: {similarity}, experience score: {experience_score}, current Workload: {user['current_workload']}, Normalized Workload: {normalized_workload}, Weighted Score: {weighted_score}')
-            # Append data for each user
-            similarities.append({
-                'user_id': user['user_id'],
-                'name': user['name'],
-                'confidence': float(weighted_score),  # Convert to percentage
-                'workload': user['current_workload'],
-                'reason': keywords
+            # Append raw data for normalization later
+                similarities.append({
+                    'id': user['id'],
+                    'name': user['name'],
+                    'confidence': weighted_score,
+                    'workload': user['current_workload'],
+                    'reason': keywords
             })
         
-        # Step 2: Sort users by the weighted score (descending order)
-        sorted_by_weighted_score = sorted(similarities, key=lambda x: x['confidence'], reverse=True)
+        # Normalize scores to 50-100 range
+            min_score = min(weighted_scores)
+            max_score = max(weighted_scores)
+        
+            for sim in similarities:
+                raw_score = sim['confidence']
+                confidence = 50 + ((raw_score - min_score) / (max_score - min_score)) * 50
+                sim['confidence'] = float(round(confidence, 2))  # Update confidence
+        
+        # Sort users by confidence (descending order)
+            sorted_by_confidence = sorted(similarities, key=lambda x: x['confidence'], reverse=True)
+        
+        # Return the top 3 users
+            return sorted_by_confidence[:3]
 
-    # # Step 3: Take top 5 users based on weighted score
-        # top_5_users = sorted_by_weighted_score[:5]
-
-    # # Step 4: Sort the top 5 users by workload (ascending order)
-    #     sorted_top_5_by_workload = sorted(top_5_users, key=lambda x: x['workload'])
-
-    # Return the top 3 users from the sorted top 5
-        return sorted_by_weighted_score[:3]
 
 
 
@@ -148,11 +155,11 @@ class AssignAssistance:
 # Sample User Data
 user_data = [
     {
-        "user_id": 101,
+        "id": 101,
         "name": "Alice Johnson",
         "job_title": "Software Engineer",
         "current_workload": 3,
-        "historical_performance_score": 0.92,
+        "historical_performance_score": 78.89,
         "previous_rfi_data": [
             {
                 "subject": "Code Refactoring Techniques",
@@ -164,11 +171,11 @@ user_data = [
         ]
     },
     {
-        "user_id": 102,
+        "id": 102,
         "name": "Bob Smith",
         "job_title": "Software Engineer",
         "current_workload": 2,
-        "historical_performance_score": 0.91,
+        "historical_performance_score": 56.67,
         "previous_rfi_data": [
             {
                 "subject": "API Integration Methods",
@@ -180,11 +187,11 @@ user_data = [
         ]
     },
     {
-        "user_id": 103,
+        "id": 103,
         "name": "Charlie Davis",
         "job_title": "Software Engineer",
         "current_workload": 1,
-        "historical_performance_score": 0.95,
+        "historical_performance_score": 45.35,
         "previous_rfi_data": [
             {
                 "subject": "Error Handling Strategies",
@@ -196,11 +203,11 @@ user_data = [
         ]
     },
     {
-        "user_id": 104,
+        "id": 104,
         "name": "David Brown",
         "job_title": "Project Manager",
         "current_workload": 4,
-        "historical_performance_score": 0.90,
+        "historical_performance_score": .20,
         "previous_rfi_data": [
             {
                 "subject": "Project Timeline Management",
@@ -212,11 +219,11 @@ user_data = [
         ]
     },
     {
-        "user_id": 105,
+        "id": 105,
         "name": "Eve White",
         "job_title": "Project Manager",
         "current_workload": 3,
-        "historical_performance_score": 0.89,
+        "historical_performance_score": 0.99,
         "previous_rfi_data": [
             {
                 "subject": "Budget Allocation",
@@ -228,11 +235,11 @@ user_data = [
         ]
     },
     {
-        "user_id": 106,
+        "id": 106,
         "name": "Fay Clark",
         "job_title": "Project Manager",
         "current_workload": 2,
-        "historical_performance_score": 0.93,
+        "historical_performance_score": 0.43,
         "previous_rfi_data": [
             {
                 "subject": "Stakeholder Communication",
@@ -244,11 +251,11 @@ user_data = [
         ]
     },
     {
-        "user_id": 107,
+        "id": 107,
         "name": "Grace Lewis",
         "job_title": "Data Analyst",
         "current_workload": 1,
-        "historical_performance_score": 0.94,
+        "historical_performance_score": 0.64,
         "previous_rfi_data": [
             {
                 "subject": "Data Cleaning Techniques",
@@ -260,11 +267,11 @@ user_data = [
         ]
     },
     {
-        "user_id": 108,
+        "id": 108,
         "name": "Hank Wilson",
         "job_title": "Data Analyst",
         "current_workload": 2,
-        "historical_performance_score": 0.92,
+        "historical_performance_score": 0.82,
         "previous_rfi_data": [
             {
                 "subject": "Data Visualization Tools",
@@ -276,7 +283,7 @@ user_data = [
         ]
     },
     {
-        "user_id": 109,
+        "id": 109,
         "name": "Ivy Martinez",
         "job_title": "Data Analyst",
         "current_workload": 3,
@@ -292,11 +299,11 @@ user_data = [
         ]
     },
     {
-        "user_id": 110,
+        "id": 110,
         "name": "Jack Taylor",
         "job_title": "Quality Assurance Engineer",
         "current_workload": 3,
-        "historical_performance_score": 0.88,
+        "historical_performance_score": 0.78,
         "previous_rfi_data": [
             {
                 "subject": "Automated Testing Frameworks",
