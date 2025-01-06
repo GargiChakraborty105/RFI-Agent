@@ -22,7 +22,7 @@ class RfiAnalysis:
         return round(urgency, 2)
 
     def predict_resolution_time(self, rfi):
-        """Estimate resolution time in hours based on priority and question complexity."""
+        """Estimate resolution time in days based on priority and question complexity."""
         complexity = len(rfi['questions_body'])  # Number of questions signifies complexity
         resolution_time = max(1, complexity * (6 - rfi['priority_value']))  # Higher priority reduces time
         return resolution_time
