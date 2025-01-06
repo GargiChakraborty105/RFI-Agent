@@ -234,6 +234,15 @@ class Fetcher:
 
         return performance[0][0]
 
+    def list_user(self, company_id):
+        self.cursor.execute(f"SELECT * FROM user_data WHERE company_id={company_id}")
+        user_fields = [desc[0] for desc in self.cursor.description]
+        user_instances = self.cursor.fetchall()
+        users = []
+        for user_instance in user_instances:
+            result = {c: r for c,r in zip(user_fields,list(user_instance))}
+            users.append(result)
+        return users
 
     def close_connection(self):
         self.cursor.close()

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
 from utils.sqlOperator import Fetcher, Uploader
 from utils.procore_data_fetcher import Procore
-from Analysis import RfiAnalysis
+from Analysis import RfiAnalysis, AssignAssistance
 from datetime import datetime, timedelta
 
 app = FastAPI()
@@ -20,17 +20,20 @@ app = FastAPI()
 #         print("Error processing request:", e)
 #         raise HTTPException(status_code=500, detail={"status": "error", "message": str(e)})
 
-@app.get("/dashboard/project/{id}")
-async def get_projects(id: int):
+@app.get("/dashboard/company/{company_id}/project/{project_id}")
+async def get_projects(company_id: int, project_id: int):
     try:
         fetch = Fetcher()
-        results = fetch.list_rfi(id)
+        results = fetch.list_rfi(project_id)
         fetch.close_connection()
         rfi_counts = len(results['rfis'])
         results['rfi_counts'] = rfi_counts
+        users = fetch.list_user(company_id)
         rfis = []
         for rfi in results['rfis']:
             analytics = fetch.list_analytics(rfi['id'])
+            assigner = AssignAssistance(users, [rfi])
+            analytics
             rfis.append(analytics)
         results['rfis'] = rfis
 
