@@ -54,6 +54,32 @@ class AssignAssistance:
         self.user_df = pd.DataFrame(user_data)
         self.rfi_df = pd.DataFrame(rfi_data)
 
+    def calculate_rfi_status(self):
+        """
+        Calculate the number of RFIs that are:
+        - On time: Resolved before or on the predicted resolution date.
+        - Delayed: Resolved after the predicted resolution date.
+        - At risk of delay: Still unresolved but close to exceeding the predicted resolution date.
+        """
+        status_counts = {"on_time": 0, "delayed": 0, "risk_of_delay": 0}
+        current_date = datetime.now()
+
+        for _, rfi in self.rfi_df.iterrows():
+            # Calculate the predicted resolution deadline
+            predicted_deadline = rfi['created_at'] + timedelta(days=rfi['resolution_time'])
+
+            if pd.notna(rfi['updated_at']):  # If the RFI is resolved
+                if rfi['updated_at'] <= predicted_deadline:
+                    status_counts["on_time"] += 1
+                else:
+                    status_counts["delayed"] += 1
+            else:  # If the RFI is unresolved
+                days_left = (predicted_deadline - current_date).days
+                if days_left <= 2:  # Arbitrary threshold for "at risk of delay"
+                    status_counts["risk_of_delay"] += 1
+
+        return status_counts
+
     def calculate_similarity(self, rfi_text, job_title):
         """Calculate similarity between RFI text and user job title using TF-IDF and cosine similarity."""
         if not job_title:  # Handle missing or empty job titles
@@ -542,6 +568,13 @@ rfi_data = [
         "project_id": 517
     }
 ]
+
+# # Instantiate the AssignAssistance class
+# assign_assist = AssignAssistance(user_data, rfi_data)
+
+# # Calculate RFI status
+# rfi_status = assign_assist.calculate_rfi_status()
+# print(rfi_status)
 
 # Run RFI Analysis
 rfi_analysis = RfiAnalysis(rfi_data)
