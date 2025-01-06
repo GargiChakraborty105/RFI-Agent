@@ -119,12 +119,12 @@ class AssignAssistance:
             # Weighted score: similarity (70%), experience (20%), workload penalty (10%)
             weighted_score = (0.6 * similarity*100) + (0.395 * experience_score*100) + (0.005*((1-normalized_workload)))
             
-            print(f'User name: {user['name']}, rfi_id: {rfi['id']}, Similarities: {similarity}, experience score: {experience_score}, current Workload: {user['current_workload']}, Normalized Workload: {normalized_workload}, Weighted Score: {weighted_score}')
+            #print(f'User name: {user['name']}, rfi_id: {rfi['id']}, Similarities: {similarity}, experience score: {experience_score}, current Workload: {user['current_workload']}, Normalized Workload: {normalized_workload}, Weighted Score: {weighted_score}')
             # Append data for each user
             similarities.append({
                 'user_id': user['user_id'],
                 'name': user['name'],
-                'confidence': weighted_score,  # Convert to percentage
+                'confidence': float(weighted_score),  # Convert to percentage
                 'workload': user['current_workload'],
                 'reason': keywords
             })
@@ -148,166 +148,167 @@ class AssignAssistance:
 # Sample User Data
 user_data = [
     {
-        "user_id": 102,
-        "name": "Jane Smith",
+        "user_id": 101,
+        "name": "Alice Johnson",
         "job_title": "Software Engineer",
-        "current_workload": 4,
-        "historical_performance_score": 0.90,
+        "current_workload": 3,
+        "historical_performance_score": 0.92,
         "previous_rfi_data": [
             {
-                "subject": "Code Optimization",
+                "subject": "Code Refactoring Techniques",
                 "questions_body": [
-                    "How can we improve the performance of this function?",
-                    "What tools are available for code profiling?"
+                    "How can we improve code readability?",
+                    "What tools can be used for code profiling?"
+                ]
+            }
+        ]
+    },
+    {
+        "user_id": 102,
+        "name": "Bob Smith",
+        "job_title": "Software Engineer",
+        "current_workload": 2,
+        "historical_performance_score": 0.91,
+        "previous_rfi_data": [
+            {
+                "subject": "API Integration Methods",
+                "questions_body": [
+                    "What is the best practice for REST API integration?",
+                    "How do we handle API rate limiting?"
                 ]
             }
         ]
     },
     {
         "user_id": 103,
-        "name": "Michael Johnson",
-        "job_title": "Data Analyst",
-        "current_workload": 2,
-        "historical_performance_score": 0.92,
+        "name": "Charlie Davis",
+        "job_title": "Software Engineer",
+        "current_workload": 1,
+        "historical_performance_score": 0.95,
         "previous_rfi_data": [
             {
-                "subject": "Data Cleaning Techniques",
+                "subject": "Error Handling Strategies",
                 "questions_body": [
-                    "What methods can be used to handle missing values?",
-                    "Are there any tools to automate data cleaning?"
+                    "What are common error handling strategies in Python?",
+                    "How can we log errors effectively?"
                 ]
             }
         ]
     },
     {
         "user_id": 104,
-        "name": "Emily White",
-        "job_title": "Quality Assurance Engineer",
-        "current_workload": 3,
-        "historical_performance_score": 0.88,
+        "name": "David Brown",
+        "job_title": "Project Manager",
+        "current_workload": 4,
+        "historical_performance_score": 0.90,
         "previous_rfi_data": [
             {
-                "subject": "Testing Automation Tools",
+                "subject": "Project Timeline Management",
                 "questions_body": [
-                    "What are the best automation tools for web testing?",
-                    "How can we implement continuous testing in our CI/CD pipeline?"
+                    "What tools can be used for Gantt charts?",
+                    "How do we track task dependencies effectively?"
                 ]
             }
         ]
     },
     {
         "user_id": 105,
-        "name": "Robert Brown",
-        "job_title": "Product Manager",
-        "current_workload": 5,
-        "historical_performance_score": 0.87,
+        "name": "Eve White",
+        "job_title": "Project Manager",
+        "current_workload": 3,
+        "historical_performance_score": 0.89,
         "previous_rfi_data": [
             {
-                "subject": "Product Launch Strategies",
+                "subject": "Budget Allocation",
                 "questions_body": [
-                    "What are the key stages of a product launch?",
-                    "How do we measure the success of a product launch?"
+                    "How do we ensure budget distribution across teams?",
+                    "What tools assist in tracking expenses in real time?"
                 ]
             }
         ]
     },
     {
         "user_id": 106,
-        "name": "Linda Green",
-        "job_title": "Technical Writer",
+        "name": "Fay Clark",
+        "job_title": "Project Manager",
         "current_workload": 2,
         "historical_performance_score": 0.93,
         "previous_rfi_data": [
             {
-                "subject": "API Documentation Standards",
+                "subject": "Stakeholder Communication",
                 "questions_body": [
-                    "What are the best practices for API documentation?",
-                    "How can we make our API guides more user-friendly?"
+                    "What methods can be used to streamline stakeholder updates?",
+                    "How do we manage conflicts between stakeholders?"
                 ]
             }
         ]
     },
     {
         "user_id": 107,
-        "name": "James Wilson",
-        "job_title": "Network Engineer",
-        "current_workload": 4,
-        "historical_performance_score": 0.89,
+        "name": "Grace Lewis",
+        "job_title": "Data Analyst",
+        "current_workload": 1,
+        "historical_performance_score": 0.94,
         "previous_rfi_data": [
             {
-                "subject": "Network Security Protocols",
+                "subject": "Data Cleaning Techniques",
                 "questions_body": [
-                    "What encryption methods are recommended for securing data?",
-                    "How do we monitor for unauthorized network access?"
+                    "What tools are effective for data deduplication?",
+                    "How can we handle missing data effectively?"
                 ]
             }
         ]
     },
     {
         "user_id": 108,
-        "name": "Sarah Taylor",
-        "job_title": "Business Analyst",
-        "current_workload": 3,
-        "historical_performance_score": 0.91,
+        "name": "Hank Wilson",
+        "job_title": "Data Analyst",
+        "current_workload": 2,
+        "historical_performance_score": 0.92,
         "previous_rfi_data": [
             {
-                "subject": "Market Research Techniques",
+                "subject": "Data Visualization Tools",
                 "questions_body": [
-                    "What are the primary tools for market analysis?",
-                    "How can we gather competitor data effectively?"
+                    "What visualization libraries are available in Python?",
+                    "How do we compare multiple datasets visually?"
                 ]
             }
         ]
     },
     {
         "user_id": 109,
-        "name": "William Martinez",
-        "job_title": "UX Designer",
-        "current_workload": 2,
-        "historical_performance_score": 0.94,
+        "name": "Ivy Martinez",
+        "job_title": "Data Analyst",
+        "current_workload": 3,
+        "historical_performance_score": 0.90,
         "previous_rfi_data": [
             {
-                "subject": "UI Design Principles",
+                "subject": "Statistical Analysis Methods",
                 "questions_body": [
-                    "What are the key principles of effective UI design?",
-                    "How do we conduct usability testing effectively?"
+                    "What are common statistical tests for correlation?",
+                    "How can we ensure data normalization?"
                 ]
             }
         ]
     },
     {
         "user_id": 110,
-        "name": "Elizabeth Clark",
-        "job_title": "DevOps Engineer",
+        "name": "Jack Taylor",
+        "job_title": "Quality Assurance Engineer",
         "current_workload": 3,
-        "historical_performance_score": 0.90,
+        "historical_performance_score": 0.88,
         "previous_rfi_data": [
             {
-                "subject": "CI/CD Pipeline Optimization",
+                "subject": "Automated Testing Frameworks",
                 "questions_body": [
-                    "What tools can help optimize the CI/CD pipeline?",
-                    "How can we reduce build times in our pipeline?"
-                ]
-            }
-        ]
-    },
-    {
-        "user_id": 111,
-        "name": "Daniel Lewis",
-        "job_title": "AI Researcher",
-        "current_workload": 1,
-        "historical_performance_score": 0.96,
-        "previous_rfi_data": [
-            {
-                "subject": "AI Model Training Techniques",
-                "questions_body": [
-                    "What strategies can improve model accuracy?",
-                    "How do we prevent overfitting during model training?"
+                    "What are the best tools for UI testing?",
+                    "How can we integrate Selenium with Jenkins?"
                 ]
             }
         ]
     }
 ]
+
 
 
 # Sample RFI Data
