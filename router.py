@@ -49,7 +49,6 @@ async def get_projects(company_id: int, project_id: int):
             print(type(rfi['resolution_time']))
             print(type(rfi['created_at']))
             rfi['created_at'] = datetime.strptime(rfi['created_at'], '%Y-%m-%dT%H:%M:%SZ')
-            # rfi['due_date'] = datetime.strptime(rfi['due_date'], '%Y-%m-%d')
             analytic['onTime_Status'] = assigner.append_rfi_status(rfi)
             rfis.append(analytic)
         
