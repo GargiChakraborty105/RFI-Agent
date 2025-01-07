@@ -573,12 +573,12 @@ rfi_data = [
     }
 ]
 
-# Instantiate the AssignAssistance class
-assign_assist = AssignAssistance(user_data, rfi_data)
+# # Instantiate the AssignAssistance class
+# assign_assist = AssignAssistance(user_data, rfi_data)
 
-# Calculate RFI status
-rfi_status = assign_assist.calculate_rfi_status()
-print(rfi_status)
+# # Calculate RFI status
+# rfi_status = assign_assist.calculate_rfi_status()
+# print(rfi_status)
 
 # Run RFI Analysis
 rfi_analysis = RfiAnalysis(rfi_data)
