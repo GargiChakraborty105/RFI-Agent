@@ -43,10 +43,24 @@ async def get_projects(company_id: int, project_id: int):
             print('getting suggested assignees')
             suggestion = assigner.suggest_top_assignees(rfi)
             analytic['suggested_assignees'] = suggestion
+            rfi['resolution_time'] = analytic['resolution_time']
+            print(type(rfi['updated_at']))
+            print(type(rfi['due_date']))
+            print(type(rfi['resolution_time']))
+            print(type(rfi['created_at']))
+            rfi['created_at'] = datetime.strptime(rfi['created_at'], '%Y-%m-%dT%H:%M:%SZ')
+            # rfi['due_date'] = datetime.strptime(rfi['due_date'], '%Y-%m-%d')
+            analytic['onTime_Status'] = assigner.append_rfi_status(rfi)
             rfis.append(analytic)
+        
         print('setting rfi analytics to rfis')
         results['rfis'] = rfis
-
+        on_time_count = sum(1 for x in rfis if x['onTime_Status'] == 'On-Time')
+        risk_of_delay_count = sum(1 for x in rfis if x['onTime_Status'] == 'Risk of Delay')
+        delayed_count = sum(1 for x in rfis if x['onTime_Status'] == 'Delayed')
+        results['on_time_count'] = on_time_count
+        results['risk_of_delay_count'] = risk_of_delay_count
+        results['delayed_count'] = delayed_count
         return {"status": "success", "data": results}
     except Exception as e:
         print("Error processing request:", e)
