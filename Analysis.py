@@ -56,12 +56,15 @@ class AssignAssistance:
 
     def calculate_rfi_status(self):
         """
-        Calculate the number of RFIs that are:
-        - On time: Resolved before or on the predicted resolution date.
+        Calculate the status of each RFI:
+        - On-time: Resolved before or on the predicted resolution date.
         - Delayed: Resolved after the predicted resolution date.
-        - At risk of delay: Still unresolved but close to exceeding the predicted resolution date.
+        - Risk of Delay: Still unresolved but close to exceeding the predicted resolution date.
+        
+        Returns:
+            A list of dictionaries, each containing the RFI ID and its status.
         """
-        status_counts = {"on_time": 0, "delayed": 0, "risk_of_delay": 0}
+        rfi_status_list = []
         current_date = datetime.now()
 
         for _, rfi in self.rfi_df.iterrows():
@@ -70,15 +73,15 @@ class AssignAssistance:
 
             if pd.notna(rfi['updated_at']):  # If the RFI is resolved
                 if rfi['updated_at'] <= predicted_deadline:
-                    status_counts["on_time"] += 1
+                    status = "On-time"
                 else:
-                    status_counts["delayed"] += 1
+                    status = "Delayed"
             else:  # If the RFI is unresolved
                 days_left = (predicted_deadline - current_date).days
-                if days_left <= 2:  # Arbitrary threshold for "at risk of delay"
-                    status_counts["risk_of_delay"] += 1
-
-        return status_counts
+                if days_left <= 2:  # Arbitrary threshold for "Risk of Delay"
+                    status = "Risk of Delay"
+                else:
+                    status = "Pending"
 
     def calculate_similarity(self, rfi_text, job_title):
         """Calculate similarity between RFI text and user job title using TF-IDF and cosine similarity."""
