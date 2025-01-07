@@ -83,6 +83,18 @@ class AssignAssistance:
                 else:
                     status = "Pending"
 
+            # Append the status for this RFI
+            rfi_status_list.append({
+                "rfi_id": rfi['id'],
+                "status": status,
+                "predicted_deadline": predicted_deadline,
+                "created_at": rfi['created_at'],
+                "updated_at": rfi['updated_at'],
+                "resolution_time": rfi['resolution_time']
+            })
+
+        return rfi_status_list
+
     def calculate_similarity(self, rfi_text, job_title):
         """Calculate similarity between RFI text and user job title using TF-IDF and cosine similarity."""
         if not job_title:  # Handle missing or empty job titles
