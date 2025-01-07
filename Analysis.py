@@ -54,46 +54,35 @@ class AssignAssistance:
         self.user_df = pd.DataFrame(user_data)
         self.rfi_df = pd.DataFrame(rfi_data)
 
-    def calculate_rfi_status(self):
+    def append_rfi_status(self):
         """
-        Calculate the status of each RFI:
-        - On-time: Resolved before or on the predicted resolution date.
-        - Delayed: Resolved after the predicted resolution date.
-        - Risk of Delay: Still unresolved but close to exceeding the predicted resolution date.
-        
+        Append the 'Status' field to each RFI based on 'created_at', 'updated_at', and 'resolution_time'.
+
         Returns:
-            A list of dictionaries, each containing the RFI ID and its status.
+            list: List of RFIs with the appended 'Status' field.
         """
-        rfi_status_list = []
-        current_date = datetime.now()
+        updated_rfis = []
 
-        for _, rfi in self.rfi_df.iterrows():
-            # Calculate the predicted resolution deadline
-            predicted_deadline = rfi['created_at'] + timedelta(days=rfi['resolution_time'])
+        for rfi in self.rfi_data:
+            # Calculate the expected resolution deadline
+            resolution_deadline = rfi['created_at'] + timedelta(days=rfi['resolution_time'])
 
-            if pd.notna(rfi['updated_at']):  # If the RFI is resolved
-                if rfi['updated_at'] <= predicted_deadline:
-                    status = "On-time"
+            # Determine the RFI status
+            if rfi['status'].lower() == "closed":
+                if rfi['updated_at'] <= resolution_deadline:
+                    rfi["Status"] = "On-Time"
                 else:
-                    status = "Delayed"
-            else:  # If the RFI is unresolved
-                days_left = (predicted_deadline - current_date).days
-                if days_left <= 2:  # Arbitrary threshold for "Risk of Delay"
-                    status = "Risk of Delay"
+                    rfi["Status"] = "Delayed"
+            else:  # RFI is still open
+                days_until_deadline = (resolution_deadline - datetime.now()).days
+                if days_until_deadline <= 2:  # Threshold for "Risk of Delay"
+                    rfi["Status"] = "Risk of Delay"
                 else:
-                    status = "Pending"
+                    rfi["Status"] = "On-Time"
 
-            # Append the status for this RFI
-            rfi_status_list.append({
-                "rfi_id": rfi['id'],
-                "status": status,
-                "predicted_deadline": predicted_deadline,
-                "created_at": rfi['created_at'],
-                "updated_at": rfi['updated_at'],
-                "resolution_time": rfi['resolution_time']
-            })
+            updated_rfis.append(rfi)
 
-        return rfi_status_list
+        return updated_rfis
 
     def calculate_similarity(self, rfi_text, job_title):
         """Calculate similarity between RFI text and user job title using TF-IDF and cosine similarity."""
@@ -584,12 +573,12 @@ rfi_data = [
     }
 ]
 
-# # Instantiate the AssignAssistance class
-# assign_assist = AssignAssistance(user_data, rfi_data)
+# Instantiate the AssignAssistance class
+assign_assist = AssignAssistance(user_data, rfi_data)
 
-# # Calculate RFI status
-# rfi_status = assign_assist.calculate_rfi_status()
-# print(rfi_status)
+# Calculate RFI status
+rfi_status = assign_assist.calculate_rfi_status()
+print(rfi_status)
 
 # Run RFI Analysis
 rfi_analysis = RfiAnalysis(rfi_data)
