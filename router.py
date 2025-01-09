@@ -65,6 +65,10 @@ async def get_projects(company_id: int, project_id: int):
         print("Error processing request:", e)
         raise HTTPException(status_code=500, detail={"status": "error", "message": str(e)})
 
+@app.get("/groups/company/{company_id}/project/{project_id}")
+def grouping(company_id: int, project_id: int):
+    
+
 @app.get("/initialise_analytics_table")
 async def initialise_analytics_table():
     try:

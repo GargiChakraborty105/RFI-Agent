@@ -14,6 +14,38 @@ class RfiAnalysis:
     def calculate_sentiment(self, text):
         """Analyze sentiment using TextBlob (range: -1.0 to 1.0)."""
         return TextBlob(text).sentiment.polarity
+    
+    def grouping(self,rfis):
+        groups = {'Unknown': []}
+        group_maps = {}
+        with open('utils\\assets\\cost_code.csv') as file: 
+            text = file.readlines()
+        print(text)
+        header = []
+        cost_codes = []
+        for line in text:
+            columns = line.replace('\n','').split(',')
+            if columns[1] == '':
+                header = [columns[0],columns[2]]
+                cost_codes = []
+                groups[header[1]] = []
+            else:
+                cost_codes.append(columns[2])
+                group_maps[header[1]] = cost_codes
+        print(group_maps)
+        for rfi in rfis:
+            flag = 0
+            print(group_maps.keys())
+            for head in group_maps.keys():
+                if rfi['cost_name'] in group_maps[head]:
+                    groups[head].append(rfi)
+                    flag = 1
+            if flag == 0:
+                groups['Unknown'].append(rfi)
+        
+        return groups
+                
+
 
     def calculate_urgency(self, rfi):
         """Determine urgency based on priority and proximity to due date."""
@@ -214,6 +246,7 @@ user_data = [
                 ]
             }
         ]
+        
     },
     {
         "id": 103,
@@ -360,7 +393,8 @@ rfi_data = [
             "What is the final scope of the project?",
             "Are there any changes to the project scope from the initial plan?"
         ],
-        "project_id": 501
+        "project_id": 501,
+        'cost_code': 300
     },
     {
         "id": 2,
@@ -373,7 +407,8 @@ rfi_data = [
             "What is the expected delivery date for materials?",
             "Are there any potential delays in procurement?"
         ],
-        "project_id": 502
+        "project_id": 502,
+        'cost_code': 302
     },
     {
         "id": 3,
@@ -386,7 +421,8 @@ rfi_data = [
             "What QA standards will be applied?",
             "Is there a need for third-party QA verification?"
         ],
-        "project_id": 503
+        "project_id": 503,
+        'cost_code': 101
     },
     {
         "id": 4,
@@ -399,7 +435,8 @@ rfi_data = [
             "Which version control system should be used?",
             "Are there guidelines for repository structure?"
         ],
-        "project_id": 504
+        "project_id": 504,
+        'cost_code': 310
     },
     {
         "id": 5,
@@ -412,7 +449,8 @@ rfi_data = [
             "What percentage of the budget is allocated for resources?",
             "Is there flexibility in budget allocation?"
         ],
-        "project_id": 505
+        "project_id": 505,
+        'cost_code': 300
     },
     {
         "id": 6,
@@ -425,7 +463,8 @@ rfi_data = [
             "What are the identified project risks?",
             "How will risk mitigation be handled?"
         ],
-        "project_id": 506
+        "project_id": 506,
+        'cost_code': 715
     },
     {
         "id": 7,
@@ -438,7 +477,8 @@ rfi_data = [
             "What are the defined roles for the project team?",
             "Who is responsible for approvals?"
         ],
-        "project_id": 507
+        "project_id": 507,
+        'cost_code': 200
     },
     {
         "id": 8,
@@ -451,7 +491,8 @@ rfi_data = [
             "How frequently will feedback be collected?",
             "What platform will be used for feedback collection?"
         ],
-        "project_id": 508
+        "project_id": 508,
+        'cost_code': 520
     },
     {
         "id": 9,
@@ -464,7 +505,8 @@ rfi_data = [
             "What are the minimum testing requirements?",
             "Is there a need for manual testing or only automation?"
         ],
-        "project_id": 509
+        "project_id": 509,
+        'cost_code': 410
     },
     {
         "id": 10,
@@ -477,6 +519,7 @@ rfi_data = [
             "What are the criteria for selecting vendors?",
             "Is there a preferred vendor list available?"
         ],
+        'cost_code': 615,
         "project_id": 510
     },
     {
@@ -490,7 +533,8 @@ rfi_data = [
             "How will sensitive data be handled?",
             "Are there any specific compliance standards to follow?"
         ],
-        "project_id": 511
+        "project_id": 511,
+        'cost_code': 300
     },
     {
         "id": 12,
@@ -503,6 +547,7 @@ rfi_data = [
             "What is the expected server load capacity?",
             "Are there backup servers in case of failure?"
         ],
+        'cost_code': 300,
         "project_id": 512
     },
     {
@@ -516,7 +561,8 @@ rfi_data = [
             "Who will be responsible for contract review?",
             "Are there any standard contract templates available?"
         ],
-        "project_id": 513
+        "project_id": 513,
+        'cost_code': 520
     },
     {
         "id": 14,
@@ -529,7 +575,8 @@ rfi_data = [
             "What are the minimum hardware specifications required?",
             "Are there any preferred hardware vendors?"
         ],
-        "project_id": 514
+        "project_id": 514,
+        'cost_code': 300
     },
     {
         "id": 15,
@@ -542,7 +589,8 @@ rfi_data = [
             "When will the training sessions start?",
             "How long will each session last?"
         ],
-        "project_id": 515
+        "project_id": 515,
+        'cost_code': 300
     },
     {
         "id": 16,
@@ -555,7 +603,8 @@ rfi_data = [
             "What factors justify the extension?",
             "How will the new deadline impact project milestones?"
         ],
-        "project_id": 516
+        "project_id": 516,
+        'cost_code': 300
     },
     {
         "id": 17,
@@ -568,6 +617,7 @@ rfi_data = [
             "What criteria define a successful UAT?",
             "Who will participate in the testing process?"
         ],
+        'cost_code': 300,
         "project_id": 517
     }
 ]
@@ -580,8 +630,9 @@ rfi_data = [
 # print(rfi_status)
 
 # Run RFI Analysis
-# rfi_analysis = RfiAnalysis(rfi_data)
-# analysis_results = rfi_analysis.run_analysis()
+rfi_analysis = RfiAnalysis(rfi_data)
+analysis_results = rfi_analysis.grouping(rfi_data)
+print(analysis_results)
 # print("RFI Analysis Results:", analysis_results)
 
 # # Suggest Assignees for Each RFI
