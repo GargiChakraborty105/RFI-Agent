@@ -1,14 +1,15 @@
 import requests
-
+import dotenv
+import os
 #token generation url 
-
+dotenv.load_dotenv()
 #https://login.procore.com/oauth/authorize?client_id=atpQwDiOJKEvGA35HP_dlcavpqa56b6v1gZbIWvrcRA&redirect_uri=http://localhost/callback&response_type=code
 
 # Replace these with your app credentials
-CLIENT_ID = "atpQwDiOJKEvGA35HP_dlcavpqa56b6v1gZbIWvrcRA"
-CLIENT_SECRET = "GjVONicEuD1_CUDrh5qU5XxPo7VV-VpD2R8u-_GTgvk"
-REDIRECT_URI = "http://localhost/callback"  # Same as what you provided during app creation
-AUTH_CODE = "M2t8dIsKCFV-NkdEJyz1DcmZNODXW6Y6ftFQcahdlHo"
+CLIENT_ID = os.getenv("CLIENT_ID")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+REDIRECT_URI = os.getenv("REDIRECT_URI")  # Same as what you provided during app creation
+AUTH_CODE = os.getenv("AUTH_CODE")
 
 TOKEN_URL = "https://sandbox.procore.com/oauth/token"
 
@@ -26,4 +27,5 @@ response.raise_for_status()
 
 # Extract the access token
 access_token = response.json().get("access_token")
+dotenv.set_key(".env","ACCESS_TOKEN", access_token)
 print("Access Token:", access_token)

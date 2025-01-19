@@ -159,6 +159,8 @@ async def initialise_database():
                     x['priority_name'] = x['priority']['name']
                     x['priority_value'] = x['priority']['value']
                     x['questions_body'] = [y['body'] for y in x['questions']]
+                    x['cost_code_id'] = x['cost_code']['id'] if x['cost_code']!=None else None 
+                    x['cost_code_name'] = x['cost_code']['name'] if x['cost_code']!=None else None
                 print(rfis)
                 
                 upload.rfi_uploader(rfis)
